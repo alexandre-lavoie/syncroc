@@ -1,0 +1,26 @@
+{
+  "name": "@syncroc/monorepo",
+  "version": "1.0.0",
+  "description": "Watch and listen with creators.",
+  "scripts": {
+    "start-backend": "npm run start --workspace=@syncroc/backend",
+    "start-plugin": "npm run start --workspace=@syncroc/plugin",
+    "build-plugin": "npm run build --workspace=@syncroc/plugin"
+  },
+  "workspaces": [
+    "packages/**"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexandre-lavoie/syncroc.git"
+  },
+  "keywords": [],
+  "author": "Alexandre Lavoie <alexandre.lavoie00@gmail.com> (https://github.com/alexandre-lavoie)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/alexandre-lavoie/syncroc/issues"
+  },
+  "homepage": "https://github.com/alexandre-lavoie/syncroc#readme",
+  "dependencies": {},
+  "devDependencies": {}
+}

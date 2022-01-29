@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Syncroc",
+  "description": "Watch and listen with creators.",
+  "version": "1.0.0",
+  "icons": {
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "homepage_url": "https://github.com/alexandre-lavoie/syncroc",
+
+  "action": {
+    "default_icon": {
+      "16": "icons/16.png",
+      "24": "icons/24.png",
+      "32": "icons/32.png"
+    },
+    "default_popup": "popup/index.html"
+  },
+  "background": {
+    "service_worker": "plugin/background.js"
+  },
+  "content_scripts": [{
+    "matches": ["https://*.youtube.com/*"],
+    "js": ["plugin/content.js"]
+  }]
+}

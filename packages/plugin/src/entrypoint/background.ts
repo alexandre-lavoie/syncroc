@@ -1,0 +1,1 @@
+import "@syncroc/plugin-background";

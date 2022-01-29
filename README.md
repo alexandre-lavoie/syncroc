@@ -1,7 +1,5 @@
 <img align="center" src="./images/banner.png" alt="Syncroc Banner" style="width:100%;height:100%"/>
 
-<br/>
-
 <p align="center">Watch videos + listen to music with your favourite creators and support the original work.</p>
 
 ## 🎥 Demo
