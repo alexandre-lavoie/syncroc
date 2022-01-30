@@ -36,6 +36,14 @@ export async function main() {
                 await media.playClip(message.payload.clip);
                 replaying = false;
                 break;
+            case ContentActionType.GET_VIDEO_INFO:
+                response({
+                    action: BackgroundActionType.GET_VIDEO_INFO,
+                    payload: {
+                        video: media.getVideo()
+                    }
+                })
+                break;
         }
     }
 

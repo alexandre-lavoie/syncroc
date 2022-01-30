@@ -1,4 +1,4 @@
-import { IMedia, IMediaClip, IMediaSnapshot, MediaAction } from "@syncroc/common";
+import { IMedia, IMediaClip, IMediaSnapshot, IVideoState, MediaAction } from "@syncroc/common";
 
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -17,6 +17,17 @@ export abstract class BaseMedia {
     public abstract getDuration(): number;
     public abstract setPlaying(playing: boolean): void;
     public abstract isPlaying(): boolean;
+    public abstract getTitle(): string;
+    public abstract getLogo(): string;
+    public abstract getChanel(): string;
+
+    public getVideo(): IVideoState {
+        return {
+            title: this.getTitle(),
+            logo: this.getLogo(),
+            chanel: this.getChanel()
+        };
+    }
 
     public playSnapshot(snapshot: IMediaSnapshot) {
         switch (snapshot.action) {
@@ -72,10 +83,12 @@ export abstract class BaseMedia {
 }
 
 export class YouTubeVideo extends BaseMedia {
+    private page: HTMLElement;
     private video: HTMLVideoElement;
 
     public constructor(page: HTMLElement) {
         super();
+        this.page = page;
         const video = page.querySelector("video");
         if (!video) throw new Error("Cannot find video.");
         this.video = video;
@@ -107,5 +120,35 @@ export class YouTubeVideo extends BaseMedia {
 
     public isPlaying(): boolean {
         return !this.video.paused;
+    }
+
+    public getTitle(): string {
+        let element = this.page.querySelector("ytd-video-primary-info-renderer .title");
+        if (element == undefined) throw Error("Failed to query title.");
+
+        let title = element.textContent;
+        if (title == undefined) throw Error("Failed to get title.");
+
+        return title;
+    }
+
+    public getLogo(): string {
+        let element = this.page.querySelector(".ytd-video-owner-renderer img");
+        if (element == undefined) throw Error("Failed to query logo.");
+
+        let url = element.getAttribute("src");
+        if (url == undefined) throw Error("Failed to get src.");
+
+        return url.replace("=s48", "=s128");
+    }
+
+    public getChanel(): string {
+        let element = this.page.querySelector("ytd-channel-name a");
+        if (element == undefined) throw Error("Failed to query chanel.");
+
+        let name = element.textContent;
+        if (name == undefined) throw Error("Failed to get chanel.")
+
+        return name;
     }
 }
