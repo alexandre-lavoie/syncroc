@@ -53,7 +53,7 @@ export async function main() {
 
     async function handleMessage(message: IContentAction, sender: chrome.runtime.MessageSender, response: (action: IBackgroundAction) => void) {
         switch (message.action) {
-            case ActionType.CONTENT_PLAY_RECORDING:
+            case ActionType.CONTENT_TOGGLE_CLIP:
                 if (playing) {
                     media.stopClip();
                     media.setPlaying(false);

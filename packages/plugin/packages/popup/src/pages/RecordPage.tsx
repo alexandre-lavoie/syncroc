@@ -10,7 +10,7 @@ export default function RecordPage({ state }: IPageProps) {
     const theme = useTheme();
 
     function onPlay() {
-        chrome.runtime.sendMessage({ action: ActionType.BACKGROUND_PLAY_RECORDING, payload: { clipId: selectedClip } });
+        chrome.runtime.sendMessage({ action: ActionType.BACKGROUND_TOGGLE_CLIP, payload: { clipId: selectedClip } });
     }
 
     function onRecord() {

@@ -38,7 +38,7 @@ export async function main() {
                     chrome.storage.local.set({ currentClip: [...currentClip, message.payload.snapshot] });
                 });
                 break;
-            case ActionType.BACKGROUND_PLAY_RECORDING:
+            case ActionType.BACKGROUND_TOGGLE_CLIP:
                 chrome.storage.local.get(["clips"], ({ clips }) => {
                     if (clips === undefined) {
                         clips = [];
@@ -47,7 +47,7 @@ export async function main() {
                     if (message.payload.clipId >= clips.length) return;
                     let clip = clips[message.payload.clipId];
 
-                    sendMessageToCurrentTab({ action: ActionType.CONTENT_PLAY_RECORDING, payload: { clip } });
+                    sendMessageToCurrentTab({ action: ActionType.CONTENT_TOGGLE_CLIP, payload: { clip } });
                 });
                 break;
             case ActionType.BACKGROUND_POPUP_VIDEO_DATA:

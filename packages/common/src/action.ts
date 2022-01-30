@@ -2,19 +2,19 @@ import { IMediaClip, IVideoState } from ".";
 import { IMediaSnapshot } from "./media";
 
 export enum ActionType {
-    CONTENT_PLAY_RECORDING,
+    CONTENT_TOGGLE_CLIP,
     CONTENT_VIDEO_DATA,
 
     BACKGROUND_SAVE_SNAPSHOT,
-    BACKGROUND_PLAY_RECORDING,
+    BACKGROUND_TOGGLE_CLIP,
     BACKGROUND_CONTENT_VIDEO_DATA,
     BACKGROUND_POPUP_VIDEO_DATA,
 
     POPUP_VIDEO_DATA
 }
 
-interface IContentReplayRecording {
-    action: ActionType.CONTENT_PLAY_RECORDING
+interface IContentToggleClip {
+    action: ActionType.CONTENT_TOGGLE_CLIP
     payload: {
         clip: IMediaClip
     }
@@ -24,10 +24,10 @@ interface IContentVideoData {
     action: ActionType.CONTENT_VIDEO_DATA
 }
 
-export type IContentAction = IContentReplayRecording | IContentVideoData;
+export type IContentAction = IContentToggleClip | IContentVideoData;
 
-interface IBackgroundReplayRecording {
-    action: ActionType.BACKGROUND_PLAY_RECORDING,
+interface IBackgroundToggleClip {
+    action: ActionType.BACKGROUND_TOGGLE_CLIP,
     payload: {
         clipId: number
     }
@@ -51,7 +51,7 @@ export interface IBackgroundPopupVideoData {
     action: ActionType.BACKGROUND_POPUP_VIDEO_DATA
 }
 
-export type IBackgroundAction = IBackgroundReplayRecording
+export type IBackgroundAction = IBackgroundToggleClip
     | IBackgroundContentVideoData
     | IBackgroundSaveSnapshot
     | IBackgroundPopupVideoData
