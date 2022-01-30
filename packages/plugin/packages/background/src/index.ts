@@ -92,7 +92,6 @@ export async function main() {
                 });
                 break;
             case ActionType.BACKGROUND_AUTOPLAY_CLIP:
-                console.log("GOT MESSAGE");
                 playClipInWindow(message.payload.clip);
                 break;
             case ActionType.BACKGROUND_POPUP_VIDEO_DATA:

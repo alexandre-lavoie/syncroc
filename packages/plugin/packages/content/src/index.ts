@@ -27,8 +27,6 @@ async function mainRecord(media: IMediaData & IMediaPlayer & IDirtyMedia) {
     });
 
     chrome.storage.onChanged.addListener((changes, area) => {
-        console.log(changes, area);
-
         if (changes?.recording?.newValue !== undefined) {
             let recording: boolean = changes.recording.newValue;
 
