@@ -1,1 +1,3 @@
-import "@syncroc/plugin-content";
+import { main } from "@syncroc/plugin-content";
+
+main();

@@ -22,7 +22,11 @@
     "service_worker": "plugin/background.js"
   },
   "content_scripts": [{
-    "matches": ["https://*.youtube.com/*"],
+    "matches": ["https://www.youtube.com/watch*"],
     "js": ["plugin/content.js"]
-  }]
+  }],
+  "permissions": [
+    "tabs",
+    "storage"
+  ]
 }

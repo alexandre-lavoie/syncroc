@@ -1,1 +1,3 @@
-import "@syncroc/plugin-background";
+import { main } from "@syncroc/plugin-background";
+
+main();
