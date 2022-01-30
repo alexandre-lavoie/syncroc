@@ -4,9 +4,11 @@
 
 ## 🎥 Demo
 
+[![Sycroc Demo](https://img.youtube.com/vi/Ntz68zOcHBU/0.jpg)](http://www.youtube.com/watch?v=Ntz68zOcHBU)
+
 ## 💾 Install
 
-Syncroc is awaiting approval to be public on the [Chrome Web Store](https://chrome.google.com/webstore/category/extensions). Install the plugin using the [GitHub build](TODO) or build using the instructions below.
+Syncroc can be installed through the [GitHub build](https://github.com/alexandre-lavoie/syncroc/releases/tag/v0) or build using the instructions below.
 
 ## 🔗 Depedencies
 
@@ -21,13 +23,21 @@ Install the depedencies:
 npm install
 ```
 
-Build the plugin:
+Build the plugin (the contents will be in `/packages/plugin/dist`):
 
 ```bash
-TODO
+npm run build-plugin
+```
+
+Running the backend:
+
+```bash
+npm run start-backend
 ```
 
 ## 🗞 Project
+
+This project is structure as a monorepo. There are currently 2 major components: plugin and backend. The plugin is made up of custom APIs to fetch content on the webpage and propagate the view across the app. The backend allows to share clips across clients, which should eventually use auth to prevent malicious clips.
 
 ## 👥 Contribution
 
