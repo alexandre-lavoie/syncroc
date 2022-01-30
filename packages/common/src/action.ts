@@ -9,6 +9,7 @@ export enum ActionType {
     BACKGROUND_TOGGLE_CLIP,
     BACKGROUND_CONTENT_VIDEO_DATA,
     BACKGROUND_POPUP_VIDEO_DATA,
+    BACKGROUND_AUTOPLAY_CLIP,
 
     POPUP_VIDEO_DATA
 }
@@ -51,10 +52,18 @@ export interface IBackgroundPopupVideoData {
     action: ActionType.BACKGROUND_POPUP_VIDEO_DATA
 }
 
+export interface IBackgroundAutoplayClip {
+    action: ActionType.BACKGROUND_AUTOPLAY_CLIP,
+    payload: {
+        clip: IMediaClip
+    }
+}
+
 export type IBackgroundAction = IBackgroundToggleClip
     | IBackgroundContentVideoData
     | IBackgroundSaveSnapshot
     | IBackgroundPopupVideoData
+    | IBackgroundAutoplayClip
     ;
 
 export interface IPopupVideoData {

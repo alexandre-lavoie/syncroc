@@ -1,4 +1,4 @@
-import { ActionType, IBackgroundAction, IContentAction, MediaAction } from "@syncroc/common";
+import { ActionType, BACKEND_URL, IBackgroundAction, IBackgroundAutoplayClip, IContentAction, MediaAction } from "@syncroc/common";
 import { IDirtyMedia, IMediaData, IMediaPlayer, YouTubeEmbed, YouTubeWatch } from "./media";
 
 async function mainRecord(media: IMediaData & IMediaPlayer & IDirtyMedia) {
@@ -83,9 +83,9 @@ async function mainPlay(media: IMediaPlayer) {
     let playing: boolean = false;
 
     async function handleMessage(message: IContentAction) {
-        switch(message.action) {
+        switch (message.action) {
             case ActionType.CONTENT_TOGGLE_CLIP:
-                if(playing) window.close();
+                if (playing) window.close();
                 playing = true;
                 media.playClip(message.payload.clip).then(() => {
                     window.close();
@@ -96,12 +96,43 @@ async function mainPlay(media: IMediaPlayer) {
     chrome.runtime.onMessage.addListener(handleMessage);
 }
 
+async function mainAutoplay() {
+    let metaElement = document.querySelector("meta[property='og:video:url']");
+    if (metaElement == undefined) return;
+
+    let url = metaElement.getAttribute("content");
+    if (url == undefined) return;
+
+    let urlSplit = url.split("/");
+    let id = urlSplit[urlSplit.length - 1];
+
+    try {
+        let reponse = await fetch(`${BACKEND_URL}/clip/${id}`);
+        let data = await reponse.json();
+
+        if (data.error) return;
+
+        let message: IBackgroundAutoplayClip = {
+            action: ActionType.BACKGROUND_AUTOPLAY_CLIP,
+            payload: {
+                clip: data
+            }
+        }
+
+        chrome.runtime.sendMessage(message);
+    } catch {}
+}
+
 export async function main() {
+    let media: any;
     if (document.URL.match(/\/embed\//)) {
         console.log("🐊 Syncroc Player 🐊");
-        mainPlay(new YouTubeEmbed(document.body));
+        media = new YouTubeEmbed(document.body);
+        mainPlay(media);
     } else if (document.URL.match(/\/watch/)) {
         console.log("🐊 Syncroc Studio 🐊");
-        mainRecord(new YouTubeWatch(document.body));
+        media = new YouTubeWatch(document.body);
+        mainRecord(media);
+        mainAutoplay();
     }
 }

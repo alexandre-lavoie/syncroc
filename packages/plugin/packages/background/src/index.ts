@@ -91,6 +91,10 @@ export async function main() {
                     // sendMessageToCurrentTab({ action: ActionType.CONTENT_TOGGLE_CLIP, payload: { clip } });
                 });
                 break;
+            case ActionType.BACKGROUND_AUTOPLAY_CLIP:
+                console.log("GOT MESSAGE");
+                playClipInWindow(message.payload.clip);
+                break;
             case ActionType.BACKGROUND_POPUP_VIDEO_DATA:
                 if (response == undefined) break;
 

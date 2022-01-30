@@ -24,7 +24,7 @@ export default function ClipList({ clips, filterId, onSelect }: IClipListProps) 
                             <ListItemIcon>
                                 <Video />
                             </ListItemIcon>
-                            <ListItemText primary="Recorded Clip" secondary={clip.length > 0 ? new Date(clip[0].time).toLocaleString("en-us") : ""} />
+                            <ListItemText primary={clip.length > 0 ? `Clip ${clip[0].media.id}` : `Clip Empty`} secondary={clip.length > 0 ? new Date(clip[0].time).toLocaleString("en-us") : ""} />
                         </ListItemButton>
                     </ListItem>
                 )).reverse()}

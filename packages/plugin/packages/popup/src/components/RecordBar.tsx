@@ -8,16 +8,18 @@ import RecordStop from "@mui/icons-material/VideocamOff";
 import ClipStart from "@mui/icons-material/PlayArrow";
 import ClipStop from "@mui/icons-material/Stop";
 import ClipSave from "@mui/icons-material/Save";
+import ClipUpload from "@mui/icons-material/Upload";
 
 export interface IControlBarProps {
     state: IPopupState,
     isClipSelect: boolean,
     onPlay?: () => void,
     onRecord?: () => void,
-    onSave?: () => void
+    onSave?: () => void,
+    onUpload?: () => void
 }
 
-export default function RecordBar({ state, isClipSelect, onPlay, onRecord, onSave }: IControlBarProps) {
+export default function RecordBar({ state, isClipSelect, onPlay, onRecord, onSave, onUpload }: IControlBarProps) {
     return (
         <AppBar position="static" sx={{ top: "auto", bottom: 0, padding: 1 }} elevation={0}>
             <Grid container spacing={2} justifyContent="center">
@@ -51,9 +53,9 @@ export default function RecordBar({ state, isClipSelect, onPlay, onRecord, onSav
                     if (!state.recording && isClipSelect) {
                         return (
                             <Grid item>
-                                <Tooltip title="Save Clip">
-                                    <IconButton color="inherit" onClick={() => onSave?.()}>
-                                        <ClipSave />
+                                <Tooltip title="Upload Clip">
+                                    <IconButton color="inherit" onClick={() => onUpload?.()}>
+                                        <ClipUpload />
                                     </IconButton>
                                 </Tooltip>
                             </Grid>
