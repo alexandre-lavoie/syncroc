@@ -1,16 +1,10 @@
-import React, { useEffect } from "react";
-import { IPopupState } from "@syncroc/common";
 import { useTheme } from "@mui/material/styles";
 import InvalidIcon from "@mui/icons-material/DoNotDisturb";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 
-interface INotSupportedProps {
-    state: IPopupState
-}
-
-export default function NotSupported({ state }: INotSupportedProps) {
+export default function NotSupported() {
     const theme = useTheme();
 
     return (

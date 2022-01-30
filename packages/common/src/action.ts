@@ -1,90 +1,67 @@
-import { IExtensionState, IMediaClip, IPopupState, IVideoState } from ".";
+import { IMediaClip, IVideoState } from ".";
 import { IMediaSnapshot } from "./media";
 
-export enum ContentActionType {
-    START_RECORDING,
-    STOP_RECORDING,
-    REPLAY_RECORDING,
-    GET_VIDEO_INFO
-}
+export enum ActionType {
+    CONTENT_PLAY_RECORDING,
+    CONTENT_VIDEO_DATA,
 
-interface IContentStartRecording {
-    action: ContentActionType.START_RECORDING
-}
+    BACKGROUND_SAVE_SNAPSHOT,
+    BACKGROUND_PLAY_RECORDING,
+    BACKGROUND_CONTENT_VIDEO_DATA,
+    BACKGROUND_POPUP_VIDEO_DATA,
 
-interface IContentStopRecording {
-    action: ContentActionType.STOP_RECORDING
+    POPUP_VIDEO_DATA
 }
 
 interface IContentReplayRecording {
-    action: ContentActionType.REPLAY_RECORDING
+    action: ActionType.CONTENT_PLAY_RECORDING
     payload: {
         clip: IMediaClip
     }
 }
 
-interface IContentGetVideoInfo {
-    action: ContentActionType.GET_VIDEO_INFO
+interface IContentVideoData {
+    action: ActionType.CONTENT_VIDEO_DATA
 }
 
-export type IContentAction = IContentStartRecording | IContentStopRecording | IContentReplayRecording | IContentGetVideoInfo;
-
-export enum BackgroundActionType {
-    START_RECORDING,
-    STOP_RECORDING,
-    SAVE_RECORDING,
-    REPLAY_RECORDING,
-    GET_STATE,
-    GET_VIDEO_INFO
-}
-
-interface IBackgroundStartRecording {
-    action: BackgroundActionType.START_RECORDING
-}
-
-interface IBackgroundStopRecording {
-    action: BackgroundActionType.STOP_RECORDING
-}
+export type IContentAction = IContentReplayRecording | IContentVideoData;
 
 interface IBackgroundReplayRecording {
-    action: BackgroundActionType.REPLAY_RECORDING
-}
-
-export interface IBackgroundSaveRecording {
-    action: BackgroundActionType.SAVE_RECORDING
+    action: ActionType.BACKGROUND_PLAY_RECORDING,
     payload: {
-        clip: IMediaClip
+        clipId: number
     }
 }
 
-export interface IBackgroundGetState {
-    action: BackgroundActionType.GET_STATE
+export interface IBackgroundSaveSnapshot {
+    action: ActionType.BACKGROUND_SAVE_SNAPSHOT
+    payload: {
+        snapshot: IMediaSnapshot
+    }
 }
 
-export interface IBackgroundGetVideoInfo {
-    action: BackgroundActionType.GET_VIDEO_INFO
+export interface IBackgroundContentVideoData {
+    action: ActionType.BACKGROUND_CONTENT_VIDEO_DATA
     payload: {
         video: IVideoState
     }
 }
 
-export type IBackgroundAction = IBackgroundStartRecording
-    | IBackgroundReplayRecording
-    | IBackgroundStopRecording
-    | IBackgroundSaveRecording
-    | IBackgroundGetState
-    | IBackgroundGetVideoInfo
-    ;
-
-export enum PopupActionType {
-    GET_STATE
+export interface IBackgroundPopupVideoData {
+    action: ActionType.BACKGROUND_POPUP_VIDEO_DATA
 }
 
-export interface IPopupGetState {
-    action: PopupActionType.GET_STATE,
+export type IBackgroundAction = IBackgroundReplayRecording
+    | IBackgroundContentVideoData
+    | IBackgroundSaveSnapshot
+    | IBackgroundPopupVideoData
+    ;
+
+export interface IPopupVideoData {
+    action: ActionType.POPUP_VIDEO_DATA
     payload: {
-        state: IPopupState
+        video?: IVideoState
     }
 }
 
-export type IPopupAction = IPopupGetState;
+export type IPopupAction = IPopupVideoData;

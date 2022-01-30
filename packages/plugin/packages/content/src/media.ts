@@ -7,9 +7,11 @@ function sleep(ms: number) {
 type dirtyCallback = (action: MediaAction) => void;
 export abstract class BaseMedia {
     private dirtyCallbacks: dirtyCallback[];
+    private clipPlaying: boolean;
 
     public constructor() {
         this.dirtyCallbacks = [];
+        this.clipPlaying = false;
     }
 
     public abstract setTime(time: number): void;
@@ -20,14 +22,7 @@ export abstract class BaseMedia {
     public abstract getTitle(): string;
     public abstract getLogo(): string;
     public abstract getChanel(): string;
-
-    public getVideo(): IVideoState {
-        return {
-            title: this.getTitle(),
-            logo: this.getLogo(),
-            chanel: this.getChanel()
-        };
-    }
+    public abstract getID(): string;
 
     public playSnapshot(snapshot: IMediaSnapshot) {
         switch (snapshot.action) {
@@ -50,14 +45,25 @@ export abstract class BaseMedia {
         }
     }
 
-    public async playClip(clip: IMediaClip) {
+    public async playClip(clip: IMediaClip | undefined) {
+        if (clip == undefined) return;
+
+        this.clipPlaying = true;
+
         let previousTime: number | null = null;
         for (let timestamp of clip) {
             if (previousTime == null) previousTime = timestamp.time;
             await sleep(timestamp.time - previousTime);
+            if (!this.clipPlaying) return;
             previousTime = timestamp.time;
             this.playSnapshot(timestamp);
         }
+
+        this.clipPlaying = false;
+    }
+
+    public stopClip() {
+        this.clipPlaying = false;
     }
 
     public registerDirty(callback: dirtyCallback) {
@@ -77,8 +83,18 @@ export abstract class BaseMedia {
         return {
             time: this.getTime(),
             duration: this.getDuration(),
-            playing: this.isPlaying()
+            playing: this.isPlaying(),
+            id: this.getID()
         }
+    }
+
+    public getVideo(): IVideoState {
+        return {
+            title: this.getTitle(),
+            logo: this.getLogo(),
+            chanel: this.getChanel(),
+            id: this.getID()
+        };
     }
 }
 
@@ -122,33 +138,37 @@ export class YouTubeVideo extends BaseMedia {
         return !this.video.paused;
     }
 
+    private getJSON(): {[key: string]: any} {
+        let element = this.page.querySelector("#scriptTag");
+        if (element == undefined) return {};
+
+        let data = element.textContent;
+        if (data == undefined) return {};
+
+        return JSON.parse(data);
+    }
+
     public getTitle(): string {
-        let element = this.page.querySelector("ytd-video-primary-info-renderer .title");
-        if (element == undefined) throw Error("Failed to query title.");
+        let json = this.getJSON();
 
-        let title = element.textContent;
-        if (title == undefined) throw Error("Failed to get title.");
-
-        return title;
+        return json?.name || "Lorem Ipsum";
     }
 
     public getLogo(): string {
-        let element = this.page.querySelector(".ytd-video-owner-renderer img");
-        if (element == undefined) throw Error("Failed to query logo.");
+        let json = this.getJSON();
 
-        let url = element.getAttribute("src");
-        if (url == undefined) throw Error("Failed to get src.");
-
-        return url.replace("=s48", "=s128");
+        return json?.thumbnailUrl?.[0] || "";
     }
 
     public getChanel(): string {
-        let element = this.page.querySelector("ytd-channel-name a");
-        if (element == undefined) throw Error("Failed to query chanel.");
+        let json = this.getJSON();
 
-        let name = element.textContent;
-        if (name == undefined) throw Error("Failed to get chanel.")
+        return json?.author || "John Doe";
+    }
 
-        return name;
+    public getID(): string {
+        let json = this.getJSON();
+
+        return json?.embedUrl || "ID";
     }
 }

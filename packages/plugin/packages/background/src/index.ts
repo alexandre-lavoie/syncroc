@@ -1,4 +1,4 @@
-import { BackgroundActionType, ContentActionType, IBackgroundAction, IBackgroundGetVideoInfo, IBackgroundSaveRecording, IContentAction, IExtensionState, IMediaClip, IMediaSnapshot, IPopupAction, IVideoState, PopupActionType } from "@syncroc/common";
+import { ActionType, IBackgroundAction, IBackgroundContentVideoData, IContentAction, IMediaClip, IMediaSnapshot, IPopupAction, IPopupVideoData, IVideoState, MediaAction } from "@syncroc/common";
 
 function queryCurrentTab(): Promise<chrome.tabs.Tab> {
     return new Promise<chrome.tabs.Tab>((resolve, reject) => {
@@ -19,11 +19,6 @@ function sendMessageToTab<T, K extends IBackgroundAction>(tab: chrome.tabs.Tab, 
 }
 
 export async function main() {
-    let state: IExtensionState = {
-        recording: false
-    };
-    let clip: IMediaClip = [];
-
     async function sendMessageToCurrentTab(message: IContentAction, hasResponse: boolean = false) {
         let tab = await queryCurrentTab();
         if (tab.id === undefined) return;
@@ -35,43 +30,63 @@ export async function main() {
         if (message == undefined || message.action == undefined) return;
 
         switch (message.action) {
-            case BackgroundActionType.START_RECORDING:
-                state.recording = true;
-                await sendMessageToCurrentTab({ action: ContentActionType.START_RECORDING });
+            case ActionType.BACKGROUND_SAVE_SNAPSHOT:
+                chrome.storage.local.get(["currentClip"], ({ currentClip }) => {
+                    if (currentClip == undefined) {
+                        currentClip = [];
+                    }
+                    chrome.storage.local.set({ currentClip: [...currentClip, message.payload.snapshot] });
+                });
                 break;
-            case BackgroundActionType.STOP_RECORDING:
-                state.recording = false;
-                await sendMessageToCurrentTab({ action: ContentActionType.STOP_RECORDING }, true);
+            case ActionType.BACKGROUND_PLAY_RECORDING:
+                chrome.storage.local.get(["clips"], ({ clips }) => {
+                    if (clips === undefined) {
+                        clips = [];
+                    }
+
+                    if (message.payload.clipId >= clips.length) return;
+                    let clip = clips[message.payload.clipId];
+
+                    sendMessageToCurrentTab({ action: ActionType.CONTENT_PLAY_RECORDING, payload: { clip } });
+                });
                 break;
-            case BackgroundActionType.SAVE_RECORDING:
-                clip = message.payload.clip;
-                break;
-            case BackgroundActionType.REPLAY_RECORDING:
-                await sendMessageToCurrentTab({ action: ContentActionType.REPLAY_RECORDING, payload: { clip } });
-                break;
-            case BackgroundActionType.GET_STATE:
-                if (response === undefined) break;
+            case ActionType.BACKGROUND_POPUP_VIDEO_DATA:
+                if (response == undefined) break;
 
                 let tab = await queryCurrentTab();
+                if (tab == undefined) break;
 
                 let video: IVideoState | undefined = undefined;
                 if (tab.url !== undefined && tab.url.match(/^https?\:\/\/www\.youtube\.com\/watch/)) {
-                    let videoPayload: IBackgroundGetVideoInfo = await sendMessageToTab(tab, { action: ContentActionType.GET_VIDEO_INFO });
+                    let videoPayload: IBackgroundContentVideoData = await sendMessageToTab(tab, { action: ActionType.CONTENT_VIDEO_DATA });
                     video = videoPayload.payload.video;
                 }
 
-                response({
-                    action: PopupActionType.GET_STATE, payload: {
-                        state: {
-                            extension: state,
-                            video
-                        },
+                let payloadMessage: IPopupVideoData = {
+                    action: ActionType.POPUP_VIDEO_DATA,
+                    payload: {
+                        video
                     }
-                });
+                };
+
+                response(payloadMessage);
 
                 break;
         }
     }
+
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (changes?.currentClip?.newValue !== undefined) {
+            let currentClip: IMediaClip = changes.currentClip.newValue;
+
+            if (currentClip.length > 0 && currentClip[currentClip.length - 1].action === MediaAction.STOP) {
+                chrome.storage.local.get(["currentClip", "clips"], ({ currentClip, clips }) => {
+                    if (clips === undefined) clips = [];
+                    chrome.storage.local.set({ currentClip: [], clips: [...clips, currentClip] });
+                });
+            }
+        }
+    });
 
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         handleMessage(request, sender, sendResponse);

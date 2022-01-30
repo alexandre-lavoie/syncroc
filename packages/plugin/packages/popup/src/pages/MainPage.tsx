@@ -1,12 +1,7 @@
-import { IExtensionState, IPopupState } from "@syncroc/common";
-import { useEffect } from "react";
+import { IPageProps } from "@syncroc/common";
 import { useNavigate } from "react-router-dom";
 
-interface IMainPageProps {
-    state: IPopupState
-}
-
-export default function MainPage({ state }: IMainPageProps) {
+export default function MainPage({ state }: IPageProps) {
     const navigate = useNavigate();
 
     return (

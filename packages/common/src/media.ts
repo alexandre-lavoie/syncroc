@@ -1,7 +1,8 @@
 export interface IMedia {
     time: number,
     duration: number,
-    playing: boolean
+    playing: boolean,
+    id: string
 }
 
 export enum MediaAction {
