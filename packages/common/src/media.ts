@@ -1,7 +1,6 @@
 export interface IMedia {
-    time: number,
-    duration: number,
-    playing: boolean,
+    time: number
+    playing: boolean
     id: string
 }
 
@@ -14,8 +13,8 @@ export enum MediaAction {
 }
 
 export interface IMediaSnapshot {
-    time: number,
-    action: MediaAction,
+    time: number
+    action: MediaAction
     media: IMedia
 }
 

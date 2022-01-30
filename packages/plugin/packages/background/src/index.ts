@@ -1,4 +1,4 @@
-import { ActionType, IBackgroundAction, IBackgroundContentVideoData, IContentAction, IMediaClip, IMediaSnapshot, IPopupAction, IPopupVideoData, IVideoState, MediaAction } from "@syncroc/common";
+import { ActionType, IBackgroundAction, IBackgroundContentVideoData, IContentAction, IContentToggleClip, IMediaClip, IMediaSnapshot, IPopupAction, IPopupVideoData, IVideoState, MediaAction } from "@syncroc/common";
 
 function queryCurrentTab(): Promise<chrome.tabs.Tab> {
     return new Promise<chrome.tabs.Tab>((resolve, reject) => {
@@ -14,6 +14,46 @@ function sendMessageToTab<T, K extends IBackgroundAction>(tab: chrome.tabs.Tab, 
         if (tab.id === undefined) reject(Error("Could not get tab id."));
         chrome.tabs.sendMessage(tab.id as unknown as number, message, (response: K) => {
             resolve(response);
+        });
+    });
+}
+
+async function playClipInWindow(clip: IMediaClip): Promise<void> {
+    if (clip.length == 0) return;
+    let tab = await queryCurrentTab();
+    if (tab == undefined) return;
+
+    let tabWidth = tab.width || 800;
+    let tabHeight = tab.height || 600;
+
+    let width = Math.floor(tabWidth / 3);
+    let height = Math.floor(tabHeight / 3);
+
+    return new Promise((resolve, reject) => {
+        chrome.windows.create({
+            url: `https://www.youtube.com/embed/${clip[0].media.id}?autoplay=1`,
+            type: "popup",
+            width,
+            height
+        }, (window?: chrome.windows.Window) => {
+            if (window == undefined) return;
+            let tab = window?.tabs?.[0];
+            if (tab == undefined) return;
+    
+            setTimeout(() => {
+                if (tab?.id == undefined) return;
+    
+                let message: IContentToggleClip = {
+                    action: ActionType.CONTENT_TOGGLE_CLIP,
+                    payload: {
+                        clip
+                    }
+                };
+    
+                chrome.tabs.sendMessage(tab.id, message);
+
+                resolve();
+            }, 3000);
         });
     });
 }
@@ -39,7 +79,7 @@ export async function main() {
                 });
                 break;
             case ActionType.BACKGROUND_TOGGLE_CLIP:
-                chrome.storage.local.get(["clips"], ({ clips }) => {
+                chrome.storage.local.get(["clips"], async ({ clips }) => {
                     if (clips === undefined) {
                         clips = [];
                     }
@@ -47,7 +87,8 @@ export async function main() {
                     if (message.payload.clipId >= clips.length) return;
                     let clip = clips[message.payload.clipId];
 
-                    sendMessageToCurrentTab({ action: ActionType.CONTENT_TOGGLE_CLIP, payload: { clip } });
+                    playClipInWindow(clip);
+                    // sendMessageToCurrentTab({ action: ActionType.CONTENT_TOGGLE_CLIP, payload: { clip } });
                 });
                 break;
             case ActionType.BACKGROUND_POPUP_VIDEO_DATA:

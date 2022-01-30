@@ -5,7 +5,35 @@ function sleep(ms: number) {
 }
 
 type dirtyCallback = (action: MediaAction) => void;
-export abstract class BaseMedia {
+export interface IDirtyMedia {
+    registerDirty(callback: dirtyCallback): void
+    removeDirty(callback: dirtyCallback): void
+    dispatchDirty(action: MediaAction): void
+}
+
+export interface IMediaBase {
+    getID(): string
+}
+
+export interface IMediaPlayer extends IMediaBase {
+    setTime(time: number): void
+    getTime(): number
+    setPlaying(playing: boolean): void
+    isPlaying(): boolean
+    getMediaObject(): IMedia
+    playClip(clip: IMediaClip | undefined): Promise<void>
+    stopClip(): void
+
+}
+
+export interface IMediaData extends IMediaBase {
+    getTitle(): string
+    getLogo(): string
+    getChanel(): string
+    getVideoData(): IVideoState
+}
+
+export abstract class BaseMediaPlayer implements IMediaPlayer, IDirtyMedia {
     private dirtyCallbacks: dirtyCallback[];
     private clipPlaying: boolean;
 
@@ -16,12 +44,8 @@ export abstract class BaseMedia {
 
     public abstract setTime(time: number): void;
     public abstract getTime(): number;
-    public abstract getDuration(): number;
     public abstract setPlaying(playing: boolean): void;
     public abstract isPlaying(): boolean;
-    public abstract getTitle(): string;
-    public abstract getLogo(): string;
-    public abstract getChanel(): string;
     public abstract getID(): string;
 
     public playSnapshot(snapshot: IMediaSnapshot) {
@@ -75,32 +99,22 @@ export abstract class BaseMedia {
         this.dirtyCallbacks = this.dirtyCallbacks.filter(cb => cb !== callback);
     }
 
-    protected dispatchDirty(action: MediaAction) {
+    public dispatchDirty(action: MediaAction) {
         this.dirtyCallbacks.forEach(callback => callback(action));
     }
 
-    public toObject(): IMedia {
+    public getMediaObject(): IMedia {
         return {
             time: this.getTime(),
-            duration: this.getDuration(),
             playing: this.isPlaying(),
             id: this.getID()
         }
     }
-
-    public getVideo(): IVideoState {
-        return {
-            title: this.getTitle(),
-            logo: this.getLogo(),
-            chanel: this.getChanel(),
-            id: this.getID()
-        };
-    }
 }
 
-export class YouTubeVideo extends BaseMedia {
-    private page: HTMLElement;
-    private video: HTMLVideoElement;
+export abstract class YoutubeBase extends BaseMediaPlayer {
+    protected page: HTMLElement;
+    protected video: HTMLVideoElement;
 
     public constructor(page: HTMLElement) {
         super();
@@ -137,7 +151,15 @@ export class YouTubeVideo extends BaseMedia {
     public isPlaying(): boolean {
         return !this.video.paused;
     }
+}
 
+export class YouTubeEmbed extends YoutubeBase {
+    public getID(): string {
+        return "EMBED";
+    }
+}
+
+export class YouTubeWatch extends YoutubeBase implements IMediaData {
     private getJSON(): {[key: string]: any} {
         let element = this.page.querySelector("#scriptTag");
         if (element == undefined) return {};
@@ -169,6 +191,22 @@ export class YouTubeVideo extends BaseMedia {
     public getID(): string {
         let json = this.getJSON();
 
-        return json?.embedUrl || "ID";
+        let id: string | undefined = undefined;
+        let url = json?.embedUrl;
+        if (url != undefined) {
+            let urlSplit = url.split("/");
+            id = urlSplit[urlSplit.length - 1];
+        }
+
+        return id || "ID";
+    }
+
+    public getVideoData(): IVideoState {
+        return {
+            title: this.getTitle(),
+            logo: this.getLogo(),
+            chanel: this.getChanel(),
+            id: this.getID()
+        };
     }
 }

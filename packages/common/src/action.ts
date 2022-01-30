@@ -13,20 +13,20 @@ export enum ActionType {
     POPUP_VIDEO_DATA
 }
 
-interface IContentToggleClip {
+export interface IContentToggleClip {
     action: ActionType.CONTENT_TOGGLE_CLIP
     payload: {
         clip: IMediaClip
     }
 }
 
-interface IContentVideoData {
+export interface IContentVideoData {
     action: ActionType.CONTENT_VIDEO_DATA
 }
 
 export type IContentAction = IContentToggleClip | IContentVideoData;
 
-interface IBackgroundToggleClip {
+export interface IBackgroundToggleClip {
     action: ActionType.BACKGROUND_TOGGLE_CLIP,
     payload: {
         clipId: number

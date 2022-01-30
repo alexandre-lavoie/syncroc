@@ -1,15 +1,14 @@
 import { ActionType, IBackgroundAction, IContentAction, MediaAction } from "@syncroc/common";
-import { BaseMedia, YouTubeVideo } from "./media";
+import { IDirtyMedia, IMediaData, IMediaPlayer, YouTubeEmbed, YouTubeWatch } from "./media";
 
-export async function main() {
-    let media: BaseMedia = new YouTubeVideo(document.body);
+async function mainRecord(media: IMediaData & IMediaPlayer & IDirtyMedia) {
     let playing: boolean = false;
 
     function recordTimestamp(action: MediaAction) {
         let snapshot = {
             time: Date.now(),
             action: action,
-            media: media.toObject()
+            media: media.getMediaObject()
         };
 
         chrome.runtime.sendMessage({
@@ -61,15 +60,16 @@ export async function main() {
                 }
                 playing = true;
                 chrome.storage.local.set({ playing: true });
-                await media.playClip(message.payload.clip);
-                playing = false;
-                chrome.storage.local.set({ playing: false });
+                media.playClip(message.payload.clip).then(() => {
+                    playing = false;
+                    chrome.storage.local.set({ playing: false });
+                });
                 break;
             case ActionType.CONTENT_VIDEO_DATA:
                 response({
                     action: ActionType.BACKGROUND_CONTENT_VIDEO_DATA,
                     payload: {
-                        video: media.getVideo()
+                        video: media.getVideoData()
                     }
                 });
                 break;
@@ -77,5 +77,31 @@ export async function main() {
     }
 
     chrome.runtime.onMessage.addListener(handleMessage);
-    console.log("🐊 Syncroc Active 🐊");
+}
+
+async function mainPlay(media: IMediaPlayer) {
+    let playing: boolean = false;
+
+    async function handleMessage(message: IContentAction) {
+        switch(message.action) {
+            case ActionType.CONTENT_TOGGLE_CLIP:
+                if(playing) window.close();
+                playing = true;
+                media.playClip(message.payload.clip).then(() => {
+                    window.close();
+                });
+        }
+    }
+
+    chrome.runtime.onMessage.addListener(handleMessage);
+}
+
+export async function main() {
+    if (document.URL.match(/\/embed\//)) {
+        console.log("🐊 Syncroc Player 🐊");
+        mainPlay(new YouTubeEmbed(document.body));
+    } else if (document.URL.match(/\/watch/)) {
+        console.log("🐊 Syncroc Studio 🐊");
+        mainRecord(new YouTubeWatch(document.body));
+    }
 }
